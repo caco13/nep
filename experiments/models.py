@@ -13,12 +13,47 @@ class Study(models.Model):
     description = models.TextField()
     start_date = models.DateField()
     end_date = models.DateField(null=True)
-    researcher = models.ForeignKey(Researcher, default='')
+    researcher = models.ForeignKey(Researcher, related_name='studies',
+                                   default='')
 
 
 class Experiment(models.Model):
     title = models.CharField(max_length=150, default='')
     description = models.TextField(default='')
     data_acquisition_done = models.BooleanField(default=False)
-    study = models.ForeignKey(Study, default='')
-    user = models.ForeignKey(User, default='')
+    study = models.ForeignKey(Study, related_name='experiments')
+    owner = models.ForeignKey(User, default='')
+
+
+class TMSSetting(models.Model):
+    name = models.CharField(max_length=150, default='')
+    description = models.TextField(default='')
+    experiment = models.ForeignKey(Experiment, default='')
+
+
+class EEGSetting(models.Model):
+    name = models.CharField(max_length=150, default='')
+    description = models.TextField(default='')
+    experiment = models.ForeignKey(Experiment, default='')
+
+
+class Manufacturer(models.Model):
+    name = models.CharField(max_length=50, default='')
+
+
+class Software(models.Model):
+    name = models.CharField(max_length=150, default='')
+    description = models.TextField(default='')
+    manufacturer = models.ForeignKey(Manufacturer, default='')
+
+
+class SoftwareVersion(models.Model):
+    name = models.CharField(max_length=150, default='')
+    software = models.ForeignKey(Software, related_name='versions')
+
+
+class EMGSetting(models.Model):
+    name = models.CharField(max_length=150, default='')
+    description = models.TextField(default='')
+    software_version = models.ForeignKey(SoftwareVersion, default='')
+    experiment = models.ForeignKey(Experiment, default='')
