@@ -36,4 +36,8 @@ urlpatterns = [
         r'0-9]+)/emg_settings/$', api.EMGSettingList.as_view()),
     url(r'^emg_settings/$', api.EMGSettingList.as_view()),
     url(r'^emg_settings/(?P<pk>[0-9]+)/$', api.EMGSettingDetail.as_view()),
+    url(r'^experiments/(?P<pk>[0-9]+)/components/$',
+        api.ComponentList.as_view()),
+    url(r'^components/$', api.ComponentList.as_view()),
+    url(r'^components/(?P<pk>[0-9]+)/$', api.ComponentDetail.as_view()),
 ]

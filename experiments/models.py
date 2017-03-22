@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
 
 
 class Researcher(models.Model):
@@ -56,4 +57,14 @@ class EMGSetting(models.Model):
     name = models.CharField(max_length=150, default='')
     description = models.TextField(default='')
     software_version = models.ForeignKey(SoftwareVersion, default='')
+    experiment = models.ForeignKey(Experiment, default='')
+
+
+class Component(models.Model):
+    identification = models.CharField(max_length=50, default='')
+    description = models.TextField(default='')
+    duration_value = models.IntegerField(default='', validators=[
+        MinValueValidator(1)])
+    duration_unit = models.CharField(max_length=15, default='')
+    component_type = models.CharField(max_length=30, default='')
     experiment = models.ForeignKey(Experiment, default='')

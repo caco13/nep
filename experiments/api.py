@@ -1,6 +1,7 @@
 from rest_framework import serializers, generics, permissions
 from experiments.models import Experiment, Study, User, Researcher, \
-    TMSSetting, EEGSetting, Manufacturer, Software, SoftwareVersion, EMGSetting
+    TMSSetting, EEGSetting, Manufacturer, Software, SoftwareVersion, \
+    EMGSetting, Component
 from experiments.permissions import IsOwnerOrReadOnly
 
 
@@ -95,6 +96,15 @@ class EMGSettingSerializer(serializers.ModelSerializer):
         model = EMGSetting
         fields = ('id', 'name', 'description', 'software_version',
                   'experiment')
+
+
+class ComponentSerializer(serializers.ModelSerializer):
+    experiment = serializers.ReadOnlyField(source='experiment.title')
+
+    class Meta:
+        model = Component
+        fields = ('id', 'identification', 'description', 'duration_value',
+                  'duration_unit', 'component_type', 'experiment')
 
 
 # API Views
@@ -244,4 +254,19 @@ class EMGSettingList(generics.ListCreateAPIView):
 class EMGSettingDetail(generics.RetrieveUpdateAPIView):
     queryset = EMGSetting.objects.all()
     serializer_class = EMGSettingSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+
+class ComponentList(generics.ListCreateAPIView):
+    queryset = Component.objects.all()
+    serializer_class = ComponentSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def perform_create(self, serializer):
+        serializer.save(experiment_id=self.kwargs.get('pk'))
+
+
+class ComponentDetail(generics.RetrieveUpdateAPIView):
+    queryset = Component.objects.all()
+    serializer_class = ComponentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
