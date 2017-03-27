@@ -92,6 +92,7 @@ class Group(models.Model):
     )
 
 
+# TODO: Constrain to 'male'/'female'?
 class Gender(models.Model):
     name = models.CharField(max_length=50)
 
@@ -102,10 +103,10 @@ class MaritalStatus(models.Model):
 
 class Participant(models.Model):
     date_birth = models.DateField(validators=[validate_date_birth])
-    gender = models.ForeignKey(Gender)
-    marital_status = models.ForeignKey(MaritalStatus)
     district = models.CharField(max_length=50)
     city = models.CharField(max_length=30)
     state = models.CharField(max_length=30)
     country = models.CharField(max_length=30)
-    removed = models.BooleanField(default=False)
+    gender = models.ForeignKey(Gender)
+    marital_status = models.ForeignKey(MaritalStatus)
+    group = models.ForeignKey(Group)

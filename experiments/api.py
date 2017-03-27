@@ -2,7 +2,8 @@ from rest_framework import serializers, generics, permissions
 
 from experiments.models import Experiment, Study, User, Researcher, \
     TMSSetting, EEGSetting, EMGSetting, Manufacturer, Software, \
-    SoftwareVersion, ProtocolComponent, Group
+    SoftwareVersion, ProtocolComponent, Group, Gender, MaritalStatus, \
+    Participant
 
 
 # API Serializers
@@ -117,6 +118,29 @@ class GroupSerializer(serializers.ModelSerializer):
                   'protocol_component')
 
 
+class GenderSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Gender
+        fields = ('id', 'name')
+
+
+class MaritalStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = MaritalStatus
+        fields = ('id', 'name')
+
+
+class ParticipantSerializer(serializers.ModelSerializer):
+    group = serializers.ReadOnlyField(source='group.title')
+
+    class Meta:
+        model = Participant
+        fields = ('id', 'date_birth', 'discrict', 'city', 'state',
+                  'country', 'gender', 'marital_status', 'group')
+
+
 # API Views
 class ExperimentList(generics.ListCreateAPIView):
     queryset = Experiment.objects.all()
@@ -215,3 +239,13 @@ class GroupList(generics.ListCreateAPIView):
     def perform_create(self, serializer):
         serializer.save(experiment_id=self.kwargs.get('pk1'),
                         experimental_protocol_id=self.kwargs.get('pk2'))
+
+
+class GenderList(generics.ListAPIView):
+    queryset = Gender.objects.all()
+    serializer_class = GenderSerializer
+
+
+class MaritalStatuslist(generics.ListAPIView):
+    queryset = MaritalStatus.objects.all()
+    serializer_class = MaritalStatusSerializer
