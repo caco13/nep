@@ -2,7 +2,7 @@ from rest_framework import serializers, generics, permissions
 
 from experiments.models import Experiment, Study, User, Researcher, \
     TMSSetting, EEGSetting, EMGSetting, Manufacturer, Software, \
-    SoftwareVersion, Component
+    SoftwareVersion, ProtocolComponent, Group
 
 
 # API Serializers
@@ -97,13 +97,24 @@ class EMGSettingSerializer(serializers.ModelSerializer):
                   'experiment')
 
 
-class ComponentSerializer(serializers.ModelSerializer):
+class ProtocolComponentSerializer(serializers.ModelSerializer):
     experiment = serializers.ReadOnlyField(source='experiment.title')
 
     class Meta:
-        model = Component
+        model = ProtocolComponent
         fields = ('id', 'identification', 'description', 'duration_value',
                   'duration_unit', 'component_type', 'experiment')
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    experiment = serializers.ReadOnlyField(source='experiment.title')
+    protocol_component = serializers.ReadOnlyField(
+        source='protocol_experiment.title')
+
+    class Meta:
+        model = Group
+        fields = ('id', 'title', 'description', 'experiment',
+                  'protocol_component')
 
 
 # API Views
@@ -187,11 +198,20 @@ class EMGSettingList(generics.ListCreateAPIView):
                         experiment_id=self.kwargs.get('pk2'))
 
 
-class ComponentList(generics.ListCreateAPIView):
-    queryset = Component.objects.all()
-    serializer_class = ComponentSerializer
+class ProtocolComponentList(generics.ListCreateAPIView):
+    queryset = ProtocolComponent.objects.all()
+    serializer_class = ProtocolComponentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
         serializer.save(experiment_id=self.kwargs.get('pk'))
 
+
+class GroupList(generics.ListCreateAPIView):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def perform_create(self, serializer):
+        serializer.save(experiment_id=self.kwargs.get('pk1'),
+                        experimental_protocol_id=self.kwargs.get('pk2'))

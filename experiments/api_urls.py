@@ -27,7 +27,10 @@ urlpatterns = [
         r'0-9]+)/emg_settings/$', api.EMGSettingList.as_view()),
     url(r'^emg_settings/$', api.EMGSettingList.as_view()),
     url(r'^experiments/(?P<pk>[0-9]+)/components/$',
-        api.ComponentList.as_view()),
-    url(r'^components/$', api.ComponentList.as_view()),
+        api.ProtocolComponentList.as_view()),
+    url(r'^protocol_components/$', api.ProtocolComponentList.as_view()),
+    url(r'^experiments/(?P<pk1>[0-9]+)/experimental_protocol/(?P<pk2>['
+        r'0-9]+)/groups/$', api.GroupList.as_view(), name='api_groups_post'),
+    url(r'^groups/$', api.GroupList.as_view(), name='api_groups'),
 ]
 
