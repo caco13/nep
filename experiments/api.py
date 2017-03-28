@@ -13,7 +13,7 @@ class ExperimentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Experiment
         fields = ('id', 'title', 'description', 'data_acquisition_done',
-                  'study', 'owner')
+                  'nes_id', 'study', 'owner')
 
 
 class OwnerSerializer(serializers.ModelSerializer):
@@ -107,17 +107,17 @@ class ProtocolComponentSerializer(serializers.ModelSerializer):
     class Meta:
         model = ProtocolComponent
         fields = ('id', 'identification', 'description', 'duration_value',
-                  'duration_unit', 'component_type', 'experiment')
+                  'duration_unit', 'component_type', 'nes_id', 'experiment')
 
 
 class GroupSerializer(serializers.ModelSerializer):
     experiment = serializers.ReadOnlyField(source='experiment.title')
     protocol_component = serializers.ReadOnlyField(
-        source='protocol_experiment.title')
+        source='protocol_component.identification')
 
     class Meta:
         model = Group
-        fields = ('id', 'title', 'description', 'experiment',
+        fields = ('id', 'title', 'description', 'nes_id', 'experiment',
                   'protocol_component')
 
 
@@ -246,7 +246,7 @@ class ProtocolComponentList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         experiment = Experiment.objects.filter(
-            nes_id=self.kwargs.get('pk2'), owner=self.request.user
+            nes_id=self.kwargs.get('pk'), owner=self.request.user
         ).get()
         serializer.save(experiment=experiment, owner=self.request.user)
 

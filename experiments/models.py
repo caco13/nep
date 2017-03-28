@@ -105,6 +105,9 @@ class ProtocolComponent(models.Model):
     experiment = models.ForeignKey(Experiment)
     owner = models.ForeignKey(User)
 
+    class Meta:
+        unique_together = ('nes_id', 'owner')
+
 
 class Group(models.Model):
     title = models.CharField(max_length=50)
@@ -118,6 +121,9 @@ class Group(models.Model):
         ProtocolComponent, null=True, on_delete=models.SET_NULL
     )
     owner = models.ForeignKey(User)
+
+    class Meta:
+        unique_together = ('nes_id', 'owner')
 
 
 class Participant(models.Model):
