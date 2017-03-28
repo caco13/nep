@@ -75,6 +75,8 @@ class ResearcherModelTest(TestCase):
 
     def test_cannot_save_empty_attributes(self):
         researcher = Researcher.objects.create(first_name='', surname='')
+        # researcher = Researcher.objects.create(first_name='', surname='',
+        #                                        nes_id=None)
         with self.assertRaises(ValidationError):
             researcher.save()
             researcher.full_clean()
