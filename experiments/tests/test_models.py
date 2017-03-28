@@ -71,9 +71,10 @@ class ResearcherModelTest(TestCase):
         self.assertEqual(researcher.first_name, '')
         self.assertEqual(researcher.surname, '')
         self.assertEqual(researcher.email, None)
+        # self.assertEqual(researcher.nes_id, None)
 
     def test_cannot_save_empty_attributes(self):
-        researcher = Researcher(first_name='', surname='')
+        researcher = Researcher.objects.create(first_name='', surname='')
         with self.assertRaises(ValidationError):
             researcher.save()
             researcher.full_clean()
