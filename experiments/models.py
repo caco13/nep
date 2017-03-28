@@ -19,7 +19,7 @@ class Researcher(models.Model):
     first_name = models.CharField(max_length=150)
     surname = models.CharField(max_length=150)
     email = models.EmailField(null=True)
-    # nes_id = models.PositiveIntegerField(unique=True)
+    nes_id = models.PositiveIntegerField(unique=True)
 
 
 class Study(models.Model):
@@ -52,7 +52,7 @@ class EEGSetting(models.Model):
 
 class Manufacturer(models.Model):
     name = models.CharField(max_length=50)
-    # nes_id = models.PositiveIntegerField()
+    nes_id = models.PositiveIntegerField(unique=True)
 
 
 class Software(models.Model):
@@ -97,12 +97,12 @@ class Group(models.Model):
 # TODO: Constrain to 'male'/'female'?
 class Gender(models.Model):
     name = models.CharField(max_length=50)
-    # nes_id = models.PositiveIntegerField()
+    nes_id = models.PositiveIntegerField(unique=True)
 
 
 class MaritalStatus(models.Model):
     name = models.CharField(max_length=50)
-    # nes_id = models.PositiveIntegerField()
+    nes_id = models.PositiveIntegerField(unique=True)
 
 
 class Participant(models.Model):
