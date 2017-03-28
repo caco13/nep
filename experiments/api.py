@@ -37,17 +37,19 @@ class StudySerializer(serializers.ModelSerializer):
     class Meta:
         model = Study
         fields = ('id', 'title', 'description', 'start_date', 'end_date',
-                  'researcher', 'experiments')
+                  'nes_id', 'researcher', 'experiments')
 
 
 class ResearcherSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
     studies = serializers.PrimaryKeyRelatedField(
         many=True, read_only=True
     )
 
     class Meta:
         model = Researcher
-        fields = ('id', 'first_name', 'surname', 'email', 'studies')
+        fields = ('id', 'first_name', 'surname', 'email', 'nes_id',
+                  'studies', 'owner')
 
 
 class TMSSettingSerializer(serializers.ModelSerializer):

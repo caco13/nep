@@ -6,12 +6,13 @@ import datetime
 
 
 # Custom validators
-# Valida data de nascimento:
-# data de nascimento maior que a data atual
-def validate_date_birth(value):
+
+# Valida data:
+# data não pode ser maior que a atual
+def validate_future_date(value):
     if value > datetime.date.today():
         raise ValidationError(
-            "Date of birth can't be greater than today date."
+            "This date cannot be greater than today date."
         )
 
 
@@ -22,14 +23,21 @@ class Researcher(models.Model):
     nes_id = models.PositiveIntegerField()
     owner = models.ForeignKey(User)
 
+    class Meta:
+        unique_together = ('nes_id', 'owner')
+
 
 class Study(models.Model):
     title = models.CharField(max_length=150)
     description = models.TextField()
-    start_date = models.DateField()
+    start_date = models.DateField(validators=[validate_future_date])
     end_date = models.DateField(null=True)
-    researcher = models.ForeignKey(Researcher, related_name='studies')
     nes_id = models.PositiveIntegerField()
+    researcher = models.ForeignKey(Researcher, related_name='studies')
+    owner = models.ForeignKey(User)
+
+    class Meta:
+        unique_together = ('nes_id', 'owner')
 
 
 class Experiment(models.Model):
@@ -113,7 +121,7 @@ class Group(models.Model):
 
 
 class Participant(models.Model):
-    date_birth = models.DateField(validators=[validate_date_birth])
+    date_birth = models.DateField(validators=[validate_future_date])
     district = models.CharField(max_length=50)
     city = models.CharField(max_length=30)
     state = models.CharField(max_length=30)
