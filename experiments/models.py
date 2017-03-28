@@ -19,7 +19,8 @@ class Researcher(models.Model):
     first_name = models.CharField(max_length=150)
     surname = models.CharField(max_length=150)
     email = models.EmailField(null=True)
-    nes_id = models.PositiveIntegerField(unique=True)
+    nes_id = models.PositiveIntegerField()
+    owner = models.ForeignKey(User)
 
 
 class Study(models.Model):
@@ -28,6 +29,7 @@ class Study(models.Model):
     start_date = models.DateField()
     end_date = models.DateField(null=True)
     researcher = models.ForeignKey(Researcher, related_name='studies')
+    nes_id = models.PositiveIntegerField()
 
 
 class Experiment(models.Model):
@@ -35,42 +37,54 @@ class Experiment(models.Model):
     description = models.TextField()
     data_acquisition_done = models.BooleanField(default=False)
     study = models.ForeignKey(Study, related_name='experiments')
-    user = models.ForeignKey(User)
+    nes_id = models.PositiveIntegerField()
+    owner = models.ForeignKey(User)
 
 
 class TMSSetting(models.Model):
     name = models.CharField(max_length=150)
     description = models.TextField()
+    nes_id = models.PositiveIntegerField()
     experiment = models.ForeignKey(Experiment)
+    owner = models.ForeignKey(User)
 
 
 class EEGSetting(models.Model):
     name = models.CharField(max_length=150)
     description = models.TextField()
+    nes_id = models.PositiveIntegerField()
     experiment = models.ForeignKey(Experiment)
+    owner = models.ForeignKey(User)
 
 
 class Manufacturer(models.Model):
     name = models.CharField(max_length=50)
-    nes_id = models.PositiveIntegerField(unique=True)
+    nes_id = models.PositiveIntegerField()
+    owner = models.ForeignKey(User)
 
 
 class Software(models.Model):
     name = models.CharField(max_length=150)
     description = models.TextField()
+    nes_id = models.PositiveIntegerField()
     manufacturer = models.ForeignKey(Manufacturer)
+    owner = models.ForeignKey(User)
 
 
 class SoftwareVersion(models.Model):
     name = models.CharField(max_length=150)
+    nes_id = models.PositiveIntegerField()
     software = models.ForeignKey(Software, related_name='versions')
+    owner = models.ForeignKey(User)
 
 
 class EMGSetting(models.Model):
     name = models.CharField(max_length=150)
     description = models.TextField()
     software_version = models.ForeignKey(SoftwareVersion)
+    nes_id = models.PositiveIntegerField()
     experiment = models.ForeignKey(Experiment)
+    owner = models.ForeignKey(User)
 
 
 class ProtocolComponent(models.Model):
@@ -79,7 +93,9 @@ class ProtocolComponent(models.Model):
     duration_value = models.IntegerField(validators=[MinValueValidator(1)])
     duration_unit = models.CharField(max_length=15)
     component_type = models.CharField(max_length=30)
+    nes_id = models.PositiveIntegerField()
     experiment = models.ForeignKey(Experiment)
+    owner = models.ForeignKey(User)
 
 
 class Group(models.Model):
@@ -88,21 +104,12 @@ class Group(models.Model):
     # TODO: to be done. ManyToMany
     # classification_of_diseases = models.ManyToManyField(
     # ClassificationOfDiseases)
+    nes_id = models.PositiveIntegerField()
     experiment = models.ForeignKey(Experiment)
     protocol_component = models.ForeignKey(
         ProtocolComponent, null=True, on_delete=models.SET_NULL
     )
-
-
-# TODO: Constrain to 'male'/'female'?
-class Gender(models.Model):
-    name = models.CharField(max_length=50)
-    nes_id = models.PositiveIntegerField(unique=True)
-
-
-class MaritalStatus(models.Model):
-    name = models.CharField(max_length=50)
-    nes_id = models.PositiveIntegerField(unique=True)
+    owner = models.ForeignKey(User)
 
 
 class Participant(models.Model):
@@ -111,6 +118,8 @@ class Participant(models.Model):
     city = models.CharField(max_length=30)
     state = models.CharField(max_length=30)
     country = models.CharField(max_length=30)
-    gender = models.ForeignKey(Gender)
-    marital_status = models.ForeignKey(MaritalStatus)
+    gender = models.CharField(max_length=20)
+    marital_status = models.CharField(max_length=30)
+    nes_id = models.PositiveIntegerField()
     group = models.ForeignKey(Group)
+    owner = models.ForeignKey('auth.User', related_name='participants')
