@@ -7,7 +7,7 @@ echo "Migrating db..."
 python manage.py migrate
 
 echo "Create test users..."
-python manage.py shell < create_users.py
+python manage.py shell < ./test_scripts/create_users.py
 
 read -n1 -r -p "Press Enter to GET researchers..." key
 if [ "$key" = '' ]; then
@@ -68,4 +68,16 @@ read -n1 -r -p "Press Enter to POST groups..." key
 if [ "$key" = '' ]; then
     echo "POSTing new group..."
     http -a lab1:nep-lab1 POST http://127.0.0.1:8000/api/experiments/1/protocol_components/1/groups/ title='First group' description='First group description' nes_id=1
+fi
+
+read -n1 -r -p "Press Enter to GET participants..." key
+if [ "$key" = '' ]; then
+    echo "GETing participants..."
+    http http://127.0.0.1:8000/api/participants/
+fi
+
+read -n1 -r -p "Press Enter to POST participants..." key
+if [ "$key" = '' ]; then
+    echo "POSTing new participant..."
+    http -a lab1:nep-lab1 POST http://127.0.0.1:8000/api/groups/1/participants/ date_birth='2000-01-01' district='Rio Pequeno' city='São Paulo' state='SP' country='Brasil' gender='M' marital_status='Solteiro' nes_id=1
 fi

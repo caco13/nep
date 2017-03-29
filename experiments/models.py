@@ -137,3 +137,6 @@ class Participant(models.Model):
     nes_id = models.PositiveIntegerField()
     group = models.ForeignKey(Group)
     owner = models.ForeignKey('auth.User', related_name='participants')
+
+    class Meta:
+        unique_together = ('nes_id', 'owner')

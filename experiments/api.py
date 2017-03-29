@@ -127,8 +127,9 @@ class ParticipantSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Participant
-        fields = ('id', 'date_birth', 'discrict', 'city', 'state',
-                  'country', 'gender', 'marital_status', 'group')
+        fields = ('id', 'date_birth', 'district', 'city', 'state',
+                  'country', 'gender', 'marital_status', 'group',
+                  'nes_id', 'owner')
 
 
 # API Views
