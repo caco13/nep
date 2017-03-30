@@ -17,9 +17,9 @@ def validate_future_date(value):
 
 
 class Researcher(models.Model):
-    first_name = models.CharField(max_length=150)
-    surname = models.CharField(max_length=150)
-    email = models.EmailField(null=True)
+    first_name = models.CharField(max_length=150, default='')
+    surname = models.CharField(max_length=150, default='')
+    email = models.EmailField(null=True, default='')
     nes_id = models.PositiveIntegerField()
     owner = models.ForeignKey(User)
 
@@ -32,6 +32,7 @@ class Study(models.Model):
     description = models.TextField()
     start_date = models.DateField(validators=[validate_future_date])
     end_date = models.DateField(null=True)
+    # TODO: add keywords (see ResearchProject nes experiment model)
     nes_id = models.PositiveIntegerField()
     researcher = models.ForeignKey(Researcher, related_name='studies')
     owner = models.ForeignKey(User)
