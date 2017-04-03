@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator
 from django.core.exceptions import ValidationError
 import datetime
 
@@ -17,9 +16,11 @@ def validate_future_date(value):
 
 
 class Researcher(models.Model):
-    first_name = models.CharField(max_length=150, default='')
-    surname = models.CharField(max_length=150, default='')
-    email = models.EmailField(null=True, default='')
+    # We are using blank=True to permit POST with blank fields
+    # from User model in nes.
+    first_name = models.CharField(max_length=150, blank=True)
+    surname = models.CharField(max_length=150, blank=True)
+    email = models.EmailField(blank=True)
     nes_id = models.PositiveIntegerField()
     owner = models.ForeignKey(User)
 
@@ -31,6 +32,7 @@ class Study(models.Model):
     title = models.CharField(max_length=150)
     description = models.TextField()
     start_date = models.DateField(validators=[validate_future_date])
+    # TODO: See if null=True or blank=True. Last gave error.
     end_date = models.DateField(null=True)
     # TODO: add keywords (see ResearchProject nes experiment model)
     nes_id = models.PositiveIntegerField()
@@ -48,6 +50,20 @@ class Experiment(models.Model):
     study = models.ForeignKey(Study, related_name='experiments')
     nes_id = models.PositiveIntegerField()
     owner = models.ForeignKey(User)
+
+
+class ProtocolComponent(models.Model):
+    identification = models.CharField(max_length=50)
+    description = models.TextField(blank=True)
+    duration_value = models.IntegerField(null=True)
+    duration_unit = models.CharField(max_length=15, blank=True)
+    component_type = models.CharField(max_length=30)
+    nes_id = models.PositiveIntegerField()
+    experiment = models.ForeignKey(Experiment)
+    owner = models.ForeignKey(User)
+
+    class Meta:
+        unique_together = ('nes_id', 'owner')
 
 
 class TMSSetting(models.Model):
@@ -96,28 +112,13 @@ class EMGSetting(models.Model):
     owner = models.ForeignKey(User)
 
 
-class ProtocolComponent(models.Model):
-    identification = models.CharField(max_length=50)
-    description = models.TextField()
-    duration_value = models.IntegerField(validators=[MinValueValidator(1)])
-    duration_unit = models.CharField(max_length=15)
-    component_type = models.CharField(max_length=30)
-    nes_id = models.PositiveIntegerField()
-    experiment = models.ForeignKey(Experiment)
-    owner = models.ForeignKey(User)
-
-    class Meta:
-        unique_together = ('nes_id', 'owner')
-
-
 class Group(models.Model):
     title = models.CharField(max_length=50)
-    description = models.TextField()
+    description = models.TextField(blank=True)
     # TODO: to be done. ManyToMany
     # classification_of_diseases = models.ManyToManyField(
     # ClassificationOfDiseases)
     nes_id = models.PositiveIntegerField()
-    experiment = models.ForeignKey(Experiment)
     protocol_component = models.ForeignKey(
         ProtocolComponent, null=True, on_delete=models.SET_NULL
     )
@@ -129,14 +130,13 @@ class Group(models.Model):
 
 class Participant(models.Model):
     date_birth = models.DateField(validators=[validate_future_date])
-    district = models.CharField(max_length=50)
-    city = models.CharField(max_length=30)
-    state = models.CharField(max_length=30)
-    country = models.CharField(max_length=30)
+    district = models.CharField(max_length=50, blank=True)
+    city = models.CharField(max_length=30, blank=True)
+    state = models.CharField(max_length=30, blank=True)
+    country = models.CharField(max_length=30, blank=True)
     gender = models.CharField(max_length=20)
-    marital_status = models.CharField(max_length=30)
+    marital_status = models.CharField(max_length=30, blank=True)
     nes_id = models.PositiveIntegerField()
-    group = models.ForeignKey(Group)
     owner = models.ForeignKey('auth.User', related_name='participants')
 
     class Meta:

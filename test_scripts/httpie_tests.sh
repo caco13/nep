@@ -3,7 +3,7 @@
 echo "Cleaning db..."
 rm db.sqlite3
 
-echo "Migrating db..."
+echo "Migrating..."
 python manage.py migrate
 
 echo "Create test users..."
@@ -28,7 +28,7 @@ if [ "$key" = '' ]; then
     http http://127.0.0.1:8000/api/studies/
 fi
 
-read -n1 -r -p "Press Enter to POST new studie..." key
+read -n1 -r -p "Press Enter to POST new study..." key
 if [ "$key" = '' ]; then
     echo "POSTing new study..."
     http -a lab1:nep-lab1 POST http://127.0.0.1:8000/api/researchers/1/studies/ title='First study' description='First study description' start_date='2017-02-02' nes_id=2
@@ -43,7 +43,7 @@ fi
 read -n1 -r -p "Press Enter to POST new experiment..." key
 if [ "$key" = '' ]; then
     echo "POSTing new experiment..."
-    http -a lab1:nep-lab1 POST http://127.0.0.1:8000/api/studies/2/experiments/ title='First experiment' description='First experiment description' nes_id=1
+    http -a lab1:nep-lab1 POST http://127.0.0.1:8000/api/studies/2/experiments/ title='First experiment' description='First experiment description' data_acquisition_done='True' nes_id=1
 fi
 
 read -n1 -r -p "Press Enter to GET protocol_components..." key

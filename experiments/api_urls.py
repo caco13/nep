@@ -29,11 +29,8 @@ urlpatterns = [
     url(r'^experiments/(?P<pk>[0-9]+)/protocol_components/$',
         api.ProtocolComponentList.as_view()),
     url(r'^protocol_components/$', api.ProtocolComponentList.as_view()),
-    url(r'^experiments/(?P<pk1>[0-9]+)/protocol_components/(?P<pk2>['
-        r'0-9]+)/groups/$', api.GroupList.as_view(), name='api_groups_post'),
+    url(r'^protocol_components/(?P<pk>[0-9]+)/groups/$', api.GroupList.as_view(), name='api_groups_post'),
     url(r'^groups/$', api.GroupList.as_view(), name='api_groups'),
     url(r'^participants/$', api.ParticipantList.as_view(),
         name='api_participants'),
-    url(r'^groups/(?P<pk>[0-9]+)/participants/$',
-        api.ParticipantList.as_view(), name='api_participants_post')
 ]

@@ -111,25 +111,22 @@ class ProtocolComponentSerializer(serializers.ModelSerializer):
 
 
 class GroupSerializer(serializers.ModelSerializer):
-    experiment = serializers.ReadOnlyField(source='experiment.title')
+    # TODO: owner missing
     protocol_component = serializers.ReadOnlyField(
         source='protocol_component.identification')
 
     class Meta:
         model = Group
-        fields = ('id', 'title', 'description', 'nes_id', 'experiment',
-                  'protocol_component')
+        fields = ('id', 'title', 'description', 'nes_id', 'protocol_component')
 
 
 class ParticipantSerializer(serializers.ModelSerializer):
-    group = serializers.ReadOnlyField(source='group.title')
     owner = serializers.ReadOnlyField(source='auth.user.username')
 
     class Meta:
         model = Participant
         fields = ('id', 'date_birth', 'district', 'city', 'state',
-                  'country', 'gender', 'marital_status', 'group',
-                  'nes_id', 'owner')
+                  'country', 'gender', 'marital_status', 'nes_id', 'owner')
 
 
 # API Views
@@ -258,14 +255,10 @@ class GroupList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
-        experiment = Experiment.objects.filter(
-            nes_id=self.kwargs.get('pk1'), owner=self.request.user
-        ).get()
         protocol_component = ProtocolComponent.objects.filter(
-            nes_id=self.kwargs.get('pk2'), owner=self.request.user
+            nes_id=self.kwargs.get('pk'), owner=self.request.user
         ).get()
-        serializer.save(experiment=experiment,
-                        protocol_component=protocol_component,
+        serializer.save(protocol_component=protocol_component,
                         owner=self.request.user)
 
 
@@ -275,7 +268,4 @@ class ParticipantList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
-        group = Group.objects.filter(
-            nes_id=self.kwargs.get('pk'), owner=self.request.user.id
-        ).get()
-        serializer.save(group=group, owner=self.request.user)
+        serializer.save(owner=self.request.user)
