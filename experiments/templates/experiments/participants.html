@@ -25,29 +25,35 @@
                 <input type="button" class="button" value="Search">
             </form>
         </div>
-        {% if experiments_list %}
+        {% if participants_list %}
             <table id="id_results_table">
                 <thead>
                 <tr>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Study</th>
-                    <th>Owner</th>
+                    <th>Date of birth</th>
+                    <th>District</th>
+                    <th>City</th>
+                    <th>State</th>
+                    <th>Country</th>
+                    <th>Gender</th>
+                    <th>Marital Status</th>
                 </tr>
                 </thead>
                 <tbody>
-                {% for experiment in experiments_list %}
+                {% for participant in participants_list %}
                     <tr>
-                        <td>{{ experiment.title }}</td>
-                        <td>{{ experiment.description }}</td>
-                        <td>{{ experiment.study.title }}</td>
-                        <td>{{ experiment.owner.username }}</td>
+                        <td>{{ participant.date_birth }}</td>
+                        <td>{{ participant.district }}</td>
+                        <td>{{ participant.city }}</td>
+                        <td>{{ participant.state }}</td>
+                        <td>{{ participant.country }}</td>
+                        <td>{{ participant.gender }}</td>
+                        <td>{{ participant.marital_status }}</td>
                     </tr>
                 {% endfor %}
                 </tbody>
             </table>
         {%  else %}
-            <p>There's currently no experiment.</p>
+            <p>There's currently no participant.</p>
         {% endif %}
     </div>
 </section>
