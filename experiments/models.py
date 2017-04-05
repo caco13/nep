@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 import datetime
+import reversion
 
 
 # Custom validators
@@ -43,6 +44,7 @@ class Study(models.Model):
         unique_together = ('nes_id', 'owner')
 
 
+@reversion.register()
 class Experiment(models.Model):
     title = models.CharField(max_length=150)
     description = models.TextField()
