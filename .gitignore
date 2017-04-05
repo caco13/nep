@@ -7,4 +7,7 @@ __pycache__
 *.swp
 
 # Scripts de testes temporários
-./test_scripts
+test_scripts
+
+# Media files
+media
