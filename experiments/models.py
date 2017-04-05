@@ -141,3 +141,9 @@ class Participant(models.Model):
 
     class Meta:
         unique_together = ('nes_id', 'owner')
+
+
+class ExamFile(models.Model):
+    # exam = models.ForeignKey(ComplementaryExam, null=False)
+    content = models.FileField()
+    owner = models.ForeignKey('auth.User')

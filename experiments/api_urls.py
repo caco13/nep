@@ -33,4 +33,5 @@ urlpatterns = [
     url(r'^groups/$', api.GroupList.as_view(), name='api_groups'),
     url(r'^participants/$', api.ParticipantList.as_view(),
         name='api_participants'),
+    url(r'^exam_uploads/$', api.ExamFileList.as_view()),
 ]

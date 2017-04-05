@@ -1,8 +1,9 @@
 from rest_framework import serializers, generics, permissions
+from rest_framework import parsers
 
 from experiments.models import Experiment, Study, User, Researcher, \
     TMSSetting, EEGSetting, EMGSetting, Manufacturer, Software, \
-    SoftwareVersion, ProtocolComponent, Group, Participant
+    SoftwareVersion, ProtocolComponent, Group, Participant, ExamFile
 
 
 # API Serializers
@@ -127,6 +128,14 @@ class ParticipantSerializer(serializers.ModelSerializer):
         model = Participant
         fields = ('id', 'date_birth', 'district', 'city', 'state',
                   'country', 'gender', 'marital_status', 'nes_id', 'owner')
+
+
+class ExamFileSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+
+    class Meta:
+        model = ExamFile
+        fields = ('content', 'owner')
 
 
 # API Views
@@ -269,3 +278,14 @@ class ParticipantList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+class ExamFileList(generics.ListCreateAPIView):
+    queryset = ExamFile.objects.all()
+    serializer_class = ExamFileSerializer
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def perform_create(self, serializer):
+        serializer.save(content=self.request.data.get('content'),
+                        owner=self.request.user)
