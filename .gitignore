@@ -5,3 +5,6 @@ db.sqlite3
 geckodriver.log
 __pycache__
 *.swp
+
+# Scripts de testes temporários
+./test_scripts

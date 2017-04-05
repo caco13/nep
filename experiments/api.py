@@ -1,8 +1,9 @@
 from rest_framework import serializers, generics, permissions
+from rest_framework import parsers
+
 from experiments.models import Experiment, Study, User, Researcher, \
-    TMSSetting, EEGSetting, Manufacturer, Software, SoftwareVersion, \
-    EMGSetting, Component
-from experiments.permissions import IsOwnerOrReadOnly
+    TMSSetting, EEGSetting, EMGSetting, Manufacturer, Software, \
+    SoftwareVersion, ProtocolComponent, Group, Participant, ExamFile
 
 
 # API Serializers
@@ -13,17 +14,19 @@ class ExperimentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Experiment
         fields = ('id', 'title', 'description', 'data_acquisition_done',
-                  'study', 'owner')
+                  'nes_id', 'study', 'owner')
 
 
-class UserSerializer(serializers.ModelSerializer):
+class OwnerSerializer(serializers.ModelSerializer):
     experiments = serializers.PrimaryKeyRelatedField(
         many=True, queryset=Experiment.objects.all()
     )
+    participants = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Participant.objects.all())
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'experiments')
+        fields = ('id', 'username', 'experiments', 'participants')
 
 
 class StudySerializer(serializers.ModelSerializer):
@@ -35,17 +38,19 @@ class StudySerializer(serializers.ModelSerializer):
     class Meta:
         model = Study
         fields = ('id', 'title', 'description', 'start_date', 'end_date',
-                  'researcher', 'experiments')
+                  'nes_id', 'researcher', 'experiments')
 
 
 class ResearcherSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
     studies = serializers.PrimaryKeyRelatedField(
         many=True, read_only=True
     )
 
     class Meta:
         model = Researcher
-        fields = ('id', 'first_name', 'surname', 'email', 'studies')
+        fields = ('id', 'first_name', 'surname', 'email', 'nes_id',
+                  'studies', 'owner')
 
 
 class TMSSettingSerializer(serializers.ModelSerializer):
@@ -98,13 +103,40 @@ class EMGSettingSerializer(serializers.ModelSerializer):
                   'experiment')
 
 
-class ComponentSerializer(serializers.ModelSerializer):
+class ProtocolComponentSerializer(serializers.ModelSerializer):
     experiment = serializers.ReadOnlyField(source='experiment.title')
 
     class Meta:
-        model = Component
+        model = ProtocolComponent
         fields = ('id', 'identification', 'description', 'duration_value',
-                  'duration_unit', 'component_type', 'experiment')
+                  'duration_unit', 'component_type', 'nes_id', 'experiment')
+
+
+class GroupSerializer(serializers.ModelSerializer):
+    # TODO: owner missing
+    protocol_component = serializers.ReadOnlyField(
+        source='protocol_component.identification')
+
+    class Meta:
+        model = Group
+        fields = ('id', 'title', 'description', 'nes_id', 'protocol_component')
+
+
+class ParticipantSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='auth.user.username')
+
+    class Meta:
+        model = Participant
+        fields = ('id', 'date_birth', 'district', 'city', 'state',
+                  'country', 'gender', 'marital_status', 'nes_id', 'owner')
+
+
+class ExamFileSerializer(serializers.ModelSerializer):
+    owner = serializers.ReadOnlyField(source='owner.username')
+
+    class Meta:
+        model = ExamFile
+        fields = ('content', 'owner')
 
 
 # API Views
@@ -114,27 +146,10 @@ class ExperimentList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
-        serializer.save(
-            owner=self.request.user, study_id=self.kwargs.get('pk')
-        )
-
-
-class ExperimentDetail(generics.RetrieveUpdateAPIView):
-    queryset = Experiment.objects.all()
-    serializer_class = ExperimentSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,
-                          IsOwnerOrReadOnly)
-
-
-class UserList(generics.ListAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-
-
-class UserDetail(generics.RetrieveAPIView):
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+        study = Study.objects.filter(
+            nes_id=self.kwargs.get('pk'), owner=self.request.user.id
+        ).get()
+        serializer.save(study=study, owner=self.request.user)
 
 
 class StudyList(generics.ListCreateAPIView):
@@ -143,18 +158,10 @@ class StudyList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
-        serializer.save(researcher_id=self.kwargs.get('pk'))
-
-    # TODO: não mostra estudos de um determinado pesquisador
-    # def get(self, request, *args, **kwargs):
-    #     study = self.get_object()
-    #     return Response(study.researcher)
-
-
-class StudyDetail(generics.RetrieveUpdateAPIView):
-    queryset = Study.objects.all()
-    serializer_class = StudySerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+        researcher = Researcher.objects.filter(
+            nes_id=self.kwargs.get('pk'), owner=self.request.user.id
+        ).get()
+        serializer.save(researcher=researcher, owner=self.request.user)
 
 
 class ResearcherList(generics.ListCreateAPIView):
@@ -162,11 +169,8 @@ class ResearcherList(generics.ListCreateAPIView):
     serializer_class = ResearcherSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-
-class ResearcherDetail(generics.RetrieveUpdateAPIView):
-    queryset = Researcher.objects.all()
-    serializer_class = ResearcherSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class TMSSettingList(generics.ListCreateAPIView):
@@ -175,13 +179,10 @@ class TMSSettingList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
-        serializer.save(experiment_id=self.kwargs.get('pk'))
-
-
-class TMSSettingDetail(generics.RetrieveUpdateAPIView):
-    queryset = TMSSetting.objects.all()
-    serializer_class = TMSSettingSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+        experiment = Experiment.objects.filter(
+            nes_id=self.kwargs.get('pk'), owner=self.request.user
+        ).get()
+        serializer.save(experiment=experiment, owner=self.request.user)
 
 
 class EEGSettingList(generics.ListCreateAPIView):
@@ -190,13 +191,10 @@ class EEGSettingList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
-        serializer.save(experiment_id=self.kwargs.get('pk'))
-
-
-class EEGSettingDetail(generics.RetrieveUpdateAPIView):
-    queryset = EEGSetting.objects.all()
-    serializer_class = EEGSettingSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+        experiment = Experiment.objects.filter(
+            nes_id=self.kwargs.get('pk'), owner=self.request.user
+        ).get()
+        serializer.save(experiment=experiment)
 
 
 class ManufacturerList(generics.ListCreateAPIView):
@@ -204,11 +202,8 @@ class ManufacturerList(generics.ListCreateAPIView):
     serializer_class = ManufacturerSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-
-class ManufacturerDetail(generics.RetrieveUpdateAPIView):
-    queryset = Manufacturer.objects.all()
-    serializer_class = ManufacturerSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
 
 
 class SoftwareList(generics.ListCreateAPIView):
@@ -217,13 +212,10 @@ class SoftwareList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
-        serializer.save(manufacturer_id=self.kwargs.get('pk'))
-
-
-class SoftwareDetail(generics.RetrieveUpdateAPIView):
-    queryset = Software.objects.all()
-    serializer_class = SoftwareSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+        manufacturer = Manufacturer.objects.filter(
+            nes_id=self.kwargs.get('pk'), owner=self.request.user
+        ).get
+        serializer.save(manufacturer=manufacturer, owner=self.request.user)
 
 
 class SoftwareVersionList(generics.ListCreateAPIView):
@@ -232,13 +224,10 @@ class SoftwareVersionList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
-        serializer.save(software_id=self.kwargs.get('pk'))
-
-
-class SoftwareVersionDetail(generics.RetrieveUpdateAPIView):
-    queryset = SoftwareVersion.objects.all()
-    serializer_class = SoftwareVersionSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+        software = Software.objects.filter(
+            nes_id=self.kwargs.get('pk'), owner=self.request.user
+        ).get()
+        serializer.save(software=software, owner=self.request.user)
 
 
 class EMGSettingList(generics.ListCreateAPIView):
@@ -247,26 +236,57 @@ class EMGSettingList(generics.ListCreateAPIView):
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
-        serializer.save(software_version_id=self.kwargs.get('pk1'),
-                        experiment_id=self.kwargs.get('pk2'))
+        software_version = SoftwareVersion.objects.filter(
+            nes_id=self.kwargs.get('pk1'), owner=self.request.user
+        ).get()
+        experiment = Experiment.objects.filter(
+            nes_id=self.kwargs.get('pk2'), owner=self.request.user
+        ).get()
+        serializer.save(software_version=software_version,
+                        experiment=experiment,
+                        owner=self.request.user)
 
 
-class EMGSettingDetail(generics.RetrieveUpdateAPIView):
-    queryset = EMGSetting.objects.all()
-    serializer_class = EMGSettingSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
-
-
-class ComponentList(generics.ListCreateAPIView):
-    queryset = Component.objects.all()
-    serializer_class = ComponentSerializer
+class ProtocolComponentList(generics.ListCreateAPIView):
+    queryset = ProtocolComponent.objects.all()
+    serializer_class = ProtocolComponentSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
-        serializer.save(experiment_id=self.kwargs.get('pk'))
+        experiment = Experiment.objects.filter(
+            nes_id=self.kwargs.get('pk'), owner=self.request.user
+        ).get()
+        serializer.save(experiment=experiment, owner=self.request.user)
 
 
-class ComponentDetail(generics.RetrieveUpdateAPIView):
-    queryset = Component.objects.all()
-    serializer_class = ComponentSerializer
+class GroupList(generics.ListCreateAPIView):
+    queryset = Group.objects.all()
+    serializer_class = GroupSerializer
     permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def perform_create(self, serializer):
+        protocol_component = ProtocolComponent.objects.filter(
+            nes_id=self.kwargs.get('pk'), owner=self.request.user
+        ).get()
+        serializer.save(protocol_component=protocol_component,
+                        owner=self.request.user)
+
+
+class ParticipantList(generics.ListCreateAPIView):
+    queryset = Participant.objects.all()
+    serializer_class = ParticipantSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+
+
+class ExamFileList(generics.ListCreateAPIView):
+    queryset = ExamFile.objects.all()
+    serializer_class = ExamFileSerializer
+    parser_classes = (parsers.MultiPartParser, parsers.FormParser)
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def perform_create(self, serializer):
+        serializer.save(content=self.request.data.get('content'),
+                        owner=self.request.user)

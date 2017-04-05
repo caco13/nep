@@ -35,7 +35,8 @@ class ExperimentModelTest(TestCase):
         experiment.user = user
         experiment.study = study
         experiment.save()
-        self.assertIn(experiment, study.experiment_set.all())
+        self.assertIn(experiment, study.experiments.all())
+        self.assertIn(experiment, user.experiment_set.all())
 
 
 class StudyModelTest(TestCase):
@@ -60,7 +61,7 @@ class StudyModelTest(TestCase):
         study = Study(start_date=datetime.utcnow())
         study.researcher = researcher
         study.save()
-        self.assertIn(study, researcher.study_set.all())
+        self.assertIn(study, researcher.studies.all())
 
 
 class ResearcherModelTest(TestCase):
@@ -70,9 +71,12 @@ class ResearcherModelTest(TestCase):
         self.assertEqual(researcher.first_name, '')
         self.assertEqual(researcher.surname, '')
         self.assertEqual(researcher.email, None)
+        # self.assertEqual(researcher.nes_id, None)
 
     def test_cannot_save_empty_attributes(self):
-        researcher = Researcher(first_name='', surname='')
+        researcher = Researcher.objects.create(first_name='', surname='')
+        # researcher = Researcher.objects.create(first_name='', surname='',
+        #                                        nes_id=None)
         with self.assertRaises(ValidationError):
             researcher.save()
             researcher.full_clean()
