@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{% static "experiments/main.css" %}">
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Lato:100,300,400">
 {#    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">#}
-    <title>Experiment versions</title>
+    <title>Experiment version detail</title>
 </head>
 <body>
 <header class="primary-header container group">
@@ -25,34 +25,15 @@
                 <input type="button" class="button" value="Search">
             </form>
         </div>
-        {% if versions %}
-            <table id="id_results_table">
-                <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Study</th>
-                    <th>Owner</th>
-                    <th>Date Created</th>
-                    <th>Version</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for version in versions %}
-                    <tr>
-                        <td>{{ version.title }}</td>
-                        <td>{{ version.description }}</td>
-                        <td>{{ version.study }}</td>
-                        <td>{{ version.owner }}</td>
-                        <td>{{ version.date }}</td>
-                        <td><a href="{% url 'experiment_version_detail' experiment_id version.version %}">{{ version.version }}</a></td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        {%  else %}
-            <p>There's no previous versions for this experiment.</p>
-        {% endif %}
+        <h2>{{ experiment_version.title }}</h2>
+        <div class="row-alt">
+            {# TODO: não tá rolando o <strong> #}
+            <p><strong>Description:</strong> {{ experiment_version.description }}</p>
+            <p><strong>Study:</strong> {{ experiment_version.study }}</p>
+            <p><strong>Owner:</strong> {{ experiment_version.owner }}</p>
+            <p><strong>Updated:</strong> {{ experiment_version.date }}</p>
+            <p><strong>Version:</strong> {{ experiment_version.version }}</p>
+        </div>
     </div>
 </section>
 <footer class="primary-footer container group">

@@ -9,7 +9,7 @@ from experiments.models import Experiment, Participant, Study
 def home_page(request):
     experiments = Experiment.objects.all()
     context = {'experiments_list': experiments}
-    return render(request, 'experiments/home.html', context)
+    return render(request, 'experiments/index.html', context)
 
 
 def experiment_detail(request, experiment_id):
@@ -43,8 +43,34 @@ def experiment_versions(request, experiment_id):
             'version': versions_length - i
         })
 
-    context = {'versions': versions_list}
+    context = {'versions': versions_list, 'experiment_id': experiment_id}
     return render(request, 'experiments/versions.html', context)
+
+
+def experiment_version_detail(request, experiment_id, version):
+    experiment = Experiment.objects.filter(id=experiment_id).get()
+    versions = Version.objects.get_for_object(experiment)
+    versions_length = len(versions)
+    version = int(version)
+    study = Study.objects.filter(id=versions[versions_length -
+                                             version].field_dict[
+        'study_id']).get()
+    owner = User.objects.filter(id=versions[versions_length -
+                                            version].field_dict[
+        'owner_id']).get()
+
+    experiment_version = {
+        'title': versions[versions_length - version].field_dict['title'],
+        'description': versions[versions_length - version].field_dict[
+            'description'],
+        'study': study.title,
+        'owner': owner.username,
+        'date': versions[versions_length - version].revision.date_created,
+        'version': version
+    }
+
+    context = {'experiment_version': experiment_version}
+    return render(request, 'experiments/version_detail.html', context)
 
 
 def participants_page(request):
