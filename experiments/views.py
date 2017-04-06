@@ -15,7 +15,7 @@ def home_page(request):
 def experiment_detail(request, experiment_id):
     experiment = Experiment.objects.filter(id=experiment_id).get()
     versions = Version.objects.get_for_object(experiment)
-    number_of_versions = len(versions) - 1
+    number_of_versions = len(versions)
     context = {'experiment': experiment, 'versions': number_of_versions}
     return render(request, 'experiments/detail.html', context)
 
@@ -29,7 +29,7 @@ def experiment_versions(request, experiment_id):
     # TODO: is that the best way?
     versions_list = list()
     versions_length = len(versions)
-    for i in range(0, versions_length - 1):
+    for i in range(0, versions_length):
         study = Study.objects.filter(id=versions[i].field_dict[
             'study_id']).get()
         owner = User.objects.filter(id=versions[i].field_dict[
@@ -40,7 +40,7 @@ def experiment_versions(request, experiment_id):
             'study': study.title,
             'owner': owner.username,
             'date': versions[i].revision.date_created,
-            'version': versions_length - 1 - i
+            'version': versions_length - i
         })
 
     context = {'versions': versions_list}
