@@ -38,7 +38,7 @@
                 <tbody>
                 {% for experiment in experiments_list %}
                     <tr>
-                        <td>{{ experiment.title }}</td>
+                        <td><a href="{% url 'experiment_detail' experiment.id %}">{{ experiment.title }}</a></td>
                         <td>{{ experiment.description }}</td>
                         <td>{{ experiment.study.title }}</td>
                         <td>{{ experiment.owner.username }}</td>
