@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {% load static %}
+    <link rel="stylesheet" href="{% static "experiments/main.css" %}">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Lato:100,300,400">
+{#    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">#}
+    <title>Experiment detail</title>
+</head>
+<body>
+<header class="primary-header container group">
+    <h1 class="logo">Neuroscience Experiments <br> Database</h1>
+    <h3 class="tagline">An open database for neuroscience experiments</h3>
+</header>
+<section class="row-alt">
+    <div class="container">
+        <div class="search-box">
+            <form>
+                <input type="text" class="search" placeholder="Search..."
+                       required>
+                <input type="button" class="button" value="Search">
+            </form>
+        </div>
+        <h2>{{ experiment.title }}</h2>
+        <div class="row-alt">
+            <p><strong>Description:</strong> {{ experiment.description }}</p>
+            <p><strong>Study:</strong> {{ experiment.study.title }}</p>
+            <p><strong>Owner:</strong> {{ experiment.owner.username }}</p>
+        </div>
+        <div class="row-alt">
+            <p>This experiment has <a href="{% url 'experiment_versions' experiment.id %}">{{ versions }}</a> versions.</p>
+        </div>
+    </div>
+</section>
+<footer class="primary-footer container group">
+    <small>&copy; Neuromat</small>
+</footer>
+{#<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>#}
+</body>
+</html>
