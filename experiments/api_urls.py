@@ -1,7 +1,13 @@
 from django.conf.urls import url
+from rest_framework.schemas import get_schema_view
 from experiments import api
 
+
+schema_view = get_schema_view(title='NEP API')
+
 urlpatterns = [
+    url(r'^schema/$', schema_view),
+    url(r'^$', api.api_root),
     url(r'^experiments/$', api.ExperimentList.as_view(),
         name='api_experiments'),
     url(r'^experiments/(?P<pk>[0-9]+)/$', api.ExperimentDetail.as_view()),
