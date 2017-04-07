@@ -143,6 +143,7 @@ class Participant(models.Model):
     gender = models.CharField(max_length=20)
     marital_status = models.CharField(max_length=30, blank=True)
     nes_id = models.PositiveIntegerField()
+    groups = models.ManyToManyField(Group)
     owner = models.ForeignKey('auth.User', related_name='participants')
 
     class Meta:
