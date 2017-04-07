@@ -4,6 +4,7 @@ from experiments import api
 urlpatterns = [
     url(r'^experiments/$', api.ExperimentList.as_view(),
         name='api_experiments'),
+    url(r'^experiments/(?P<pk>[0-9]+)/$', api.ExperimentDetail.as_view()),
     url(r'^studies/(?P<pk>[0-9]+)/experiments/$',
         api.ExperimentList.as_view(), name='api_experiments_post'),
     url(r'^studies/$', api.StudyList.as_view(), name='api_studies'),

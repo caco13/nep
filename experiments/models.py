@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 import datetime
+import reversion
 
 
 # Custom validators
@@ -43,6 +44,7 @@ class Study(models.Model):
         unique_together = ('nes_id', 'owner')
 
 
+@reversion.register()
 class Experiment(models.Model):
     title = models.CharField(max_length=150)
     description = models.TextField()
@@ -50,6 +52,10 @@ class Experiment(models.Model):
     study = models.ForeignKey(Study, related_name='experiments')
     nes_id = models.PositiveIntegerField()
     owner = models.ForeignKey(User)
+    # TODO: not following studies
+    # versions[1].field_dict["study"] returns error
+    # versions[1].field_dict["study_id"] returns id
+    reversion.register(Study, follow='experiments')
 
 
 class ProtocolComponent(models.Model):
@@ -137,6 +143,7 @@ class Participant(models.Model):
     gender = models.CharField(max_length=20)
     marital_status = models.CharField(max_length=30, blank=True)
     nes_id = models.PositiveIntegerField()
+    groups = models.ManyToManyField(Group)
     owner = models.ForeignKey('auth.User', related_name='participants')
 
     class Meta:

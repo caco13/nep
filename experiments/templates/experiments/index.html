@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {% load static %}
+    <link rel="stylesheet" href="{% static "experiments/main.css" %}">
+    <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Lato:100,300,400">
+{#    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">#}
+    <title>Neuroscience Experiments Database</title>
+</head>
+<body>
+<header class="primary-header container group">
+    <h1 class="logo">Neuroscience Experiments <br> Database</h1>
+    <h3 class="tagline">An open database for neuroscience experiments</h3>
+</header>
+<section class="row-alt">
+    <div class="container">
+        <div class="search-box">
+            <form>
+                <input type="text" class="search" placeholder="Search..."
+                       required>
+                <input type="button" class="button" value="Search">
+            </form>
+        </div>
+        {% if experiments_list %}
+            <table id="id_results_table">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Study</th>
+                    <th>Owner</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for experiment in experiments_list %}
+                    <tr>
+                        <td><a href="{% url 'experiment_detail' experiment.id %}">{{ experiment.title }}</a></td>
+                        <td>{{ experiment.description }}</td>
+                        <td>{{ experiment.study.title }}</td>
+                        <td>{{ experiment.owner.username }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {%  else %}
+            <p>There's currently no experiment.</p>
+        {% endif %}
+    </div>
+</section>
+<footer class="primary-footer container group">
+    <small>&copy; Neuromat</small>
+</footer>
+{#<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>#}
+</body>
+</html>

@@ -152,6 +152,11 @@ class ExperimentList(generics.ListCreateAPIView):
         serializer.save(study=study, owner=self.request.user)
 
 
+class ExperimentDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Experiment.objects.all()
+    serializer_class = ExperimentSerializer
+
+
 class StudyList(generics.ListCreateAPIView):
     queryset = Study.objects.all()
     serializer_class = StudySerializer
