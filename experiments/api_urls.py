@@ -1,12 +1,13 @@
 from django.conf.urls import url
+from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework.schemas import get_schema_view
 from experiments import api
 
 
 schema_view = get_schema_view(title='NEP API')
 
-urlpatterns = [
-    url(r'^schema/$', schema_view),
+urlpatterns = format_suffix_patterns([
+    url(r'^schema/$', schema_view), #TODO: ver real uso
     url(r'^$', api.api_root),
     url(r'^experiments/$', api.ExperimentList.as_view(),
         name='api_experiments'),
@@ -42,4 +43,4 @@ urlpatterns = [
     url(r'^participants/$', api.ParticipantList.as_view(),
         name='api_participants'),
     url(r'^exam_uploads/$', api.ExamFileList.as_view()),
-]
+])
