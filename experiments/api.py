@@ -169,6 +169,15 @@ class ExperimentDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ExperimentSerializer
 
 
+class ExperimentListNesId(generics.ListAPIView):
+    serializer_class = ExperimentSerializer
+
+    def get_queryset(self):
+        nes_id = self.kwargs['nes_id']
+        return Experiment.objects.filter(owner=self.request.user,
+                                         nes_id=nes_id)
+
+
 class StudyList(generics.ListCreateAPIView):
     queryset = Study.objects.all()
     serializer_class = StudySerializer
