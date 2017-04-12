@@ -77,3 +77,10 @@ def participants_page(request):
     participants = Participant.objects.all()
     context = {'participants_list': participants}
     return render(request, 'experiments/participants.html', context)
+
+
+def experiment_study(request, experiment_id):
+    experiment = Experiment.objects.filter(id=experiment_id).get()
+    study = experiment.study
+    context = {'study': study}
+    return render(request, 'experiments/study_detail.html', context)

@@ -28,7 +28,8 @@
         <h2>{{ experiment.title }}</h2>
         <div class="row-alt">
             <p><strong>Description:</strong> {{ experiment.description }}</p>
-            <p><strong>Study:</strong> {{ experiment.study.title }}</p>
+            <p><strong>Study:</strong><a href="{% url 'experiment_study' experiment.study.id %}">
+                {{ experiment.study.title }}</a></p>
             <p><strong>Owner:</strong> {{ experiment.owner.username }}</p>
         </div>
         <div class="row-alt">

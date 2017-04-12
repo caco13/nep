@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{% static "experiments/main.css" %}">
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Lato:100,300,400">
 {#    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">#}
-    <title>Neuroscience Experiments Database</title>
+    <title>Experiment Study detail</title>
 </head>
 <body>
 <header class="primary-header container group">
@@ -25,30 +25,15 @@
                 <input type="button" class="button" value="Search">
             </form>
         </div>
-        {% if experiments_list %}
-            <table id="id_results_table">
-                <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Study</th>
-                    <th>Owner</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for experiment in experiments_list %}
-                    <tr>
-                        <td><a href="{% url 'experiment_detail' experiment.id %}">{{ experiment.title }}</a></td>
-                        <td>{{ experiment.description }}</td>
-                        <td><a href="{% url 'experiment_study' experiment.study.id %}">{{ experiment.study.title }}</a></td>
-                        <td>{{ experiment.owner.username }}</td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        {%  else %}
-            <p>There's currently no experiment.</p>
-        {% endif %}
+        <h2>{{ study.title }}</h2>
+        <div class="row-alt">
+            <p><strong>Description:</strong> {{ study.description }}</p>
+            <p><strong>Start date:</strong> {{ study.start_date }}</p>
+            <p><strong>End date:</strong> {{ study.end_date }}</p>
+            <p><strong>Researcher:</strong>
+                {{ study.researcher.first_name }}&nbsp;
+                {{ study.researcher.surname }}</p>
+        </div>
     </div>
 </section>
 <footer class="primary-footer container group">
