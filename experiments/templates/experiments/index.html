@@ -40,7 +40,7 @@
                     <tr>
                         <td><a href="{% url 'experiment_detail' experiment.id %}">{{ experiment.title }}</a></td>
                         <td>{{ experiment.description }}</td>
-                        <td>{{ experiment.study.title }}</td>
+                        <td><a href="{% url 'experiment_study' experiment.study.id %}">{{ experiment.study.title }}</a></td>
                         <td>{{ experiment.owner.username }}</td>
                     </tr>
                 {% endfor %}

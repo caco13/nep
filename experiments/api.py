@@ -169,16 +169,38 @@ class ExperimentDetail(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = ExperimentSerializer
 
 
+class ExperimentListNesId(generics.ListAPIView):
+    serializer_class = ExperimentSerializer
+
+    def get_queryset(self):
+        nes_id = self.kwargs['nes_id']
+        return Experiment.objects.filter(owner=self.request.user,
+                                         nes_id=nes_id)
+
+
 class StudyList(generics.ListCreateAPIView):
     queryset = Study.objects.all()
     serializer_class = StudySerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
     def perform_create(self, serializer):
         researcher = Researcher.objects.filter(
             nes_id=self.kwargs.get('pk'), owner=self.request.user.id
         ).get()
         serializer.save(researcher=researcher, owner=self.request.user)
+
+
+class StudyListNesId(generics.ListAPIView):
+    serializer_class = StudySerializer
+
+    def get_queryset(self):
+        nes_id = self.kwargs['nes_id']
+        return Study.objects.filter(owner=self.request.user, nes_id=nes_id)
+
+
+class StudyDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Study.objects.all()
+    serializer_class = StudySerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class ResearcherList(generics.ListCreateAPIView):
@@ -188,6 +210,26 @@ class ResearcherList(generics.ListCreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+
+class ResearcherListNesId(generics.ListAPIView):
+    serializer_class = ResearcherSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+
+    def get_queryset(self):
+        """
+        We need to get the object by its nes_id in order to
+        be able to update it by nep id
+        """
+        nes_id = self.kwargs['nes_id']
+        return Researcher.objects.filter(owner=self.request.user,
+                                         nes_id=nes_id)
+
+
+class ResearcherDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Researcher.objects.all()
+    serializer_class = ResearcherSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
 
 class TMSSettingList(generics.ListCreateAPIView):

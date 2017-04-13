@@ -39,6 +39,7 @@ class Study(models.Model):
     nes_id = models.PositiveIntegerField()
     researcher = models.ForeignKey(Researcher, related_name='studies')
     owner = models.ForeignKey(User)
+    reversion.register(Researcher, follow=['studies'])
 
     class Meta:
         unique_together = ('nes_id', 'owner')
@@ -55,7 +56,8 @@ class Experiment(models.Model):
     # TODO: not following studies
     # versions[1].field_dict["study"] returns error
     # versions[1].field_dict["study_id"] returns id
-    reversion.register(Study, follow='experiments')
+    # TODO: commented to pass test scripts
+    reversion.register(Study, follow=['experiments'])
 
 
 class ProtocolComponent(models.Model):
