@@ -48,6 +48,20 @@ class Study(models.Model):
         unique_together = ('nes_id', 'owner')
 
 
+class ExperimentStatus(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+
+# TODO: is there a best solution? See Experiment.
+# TODO: http://stackoverflow.com/questions/9311996/setting-default-value-for
+# TODO: -foreign-key-attribute#9312738
+DEFAULT_STATUS = 1
+
+
 @reversion.register()
 class Experiment(models.Model):
     title = models.CharField(max_length=150)
@@ -56,6 +70,7 @@ class Experiment(models.Model):
     study = models.ForeignKey(Study, related_name='experiments')
     nes_id = models.PositiveIntegerField()
     owner = models.ForeignKey(User)
+    status = models.ForeignKey(ExperimentStatus, default=DEFAULT_STATUS)
     reversion.register(Study, follow=['experiments'])
 
     def __str__(self):
@@ -63,14 +78,6 @@ class Experiment(models.Model):
 
     class Meta:
         unique_together = ('nes_id', 'owner')
-
-
-class ExperimentStatus(models.Model):
-    name = models.CharField(max_length=50)
-    description = models.TextField()
-
-    def __str__(self):
-        return self.name
 
 
 class ProtocolComponent(models.Model):
