@@ -56,10 +56,6 @@ class Experiment(models.Model):
     study = models.ForeignKey(Study, related_name='experiments')
     nes_id = models.PositiveIntegerField()
     owner = models.ForeignKey(User)
-    # TODO: not following studies
-    # versions[1].field_dict["study"] returns error
-    # versions[1].field_dict["study_id"] returns id
-    # TODO: commented to pass test scripts
     reversion.register(Study, follow=['experiments'])
 
     def __str__(self):
