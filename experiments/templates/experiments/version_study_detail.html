@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="{% static "experiments/main.css" %}">
     <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Lato:100,300,400">
 {#    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">#}
-    <title>Experiment version detail</title>
+    <title>Experiment Study detail</title>
 </head>
 <body>
 <header class="primary-header container group">
@@ -25,16 +25,14 @@
                 <input type="button" class="button" value="Search">
             </form>
         </div>
-        <h2>{{ experiment_version.title }}</h2>
+        <h2>{{ study.title }}</h2>
         <div class="row-alt">
-            {# TODO: não tá rolando o <strong> #}
-            <p><strong>Description:</strong> {{ experiment_version.description }}</p>
-            <p><strong>Study:</strong><a href="
-{% url 'experiment_study_version' experiment_version.id experiment_version.version %}"
-            >{{ experiment_version.study }}</a></p>
-            <p><strong>Owner:</strong> {{ experiment_version.owner }}</p>
-            <p><strong>Updated:</strong> {{ experiment_version.date }}</p>
-            <p><strong>Version:</strong> {{ experiment_version.version }}</p>
+            <p><strong>Description:</strong> {{ study.description }}</p>
+            <p><strong>Start date:</strong> {{ study.start_date }}</p>
+            <p><strong>End date:</strong> {{ study.end_date }}</p>
+            <p><strong>Researcher:</strong>
+                {{ study.researcher.first_name }}&nbsp;
+                {{ study.researcher.surname }}</p>
         </div>
     </div>
 </section>
