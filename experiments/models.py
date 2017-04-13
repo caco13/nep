@@ -41,6 +41,9 @@ class Study(models.Model):
     owner = models.ForeignKey(User)
     reversion.register(Researcher, follow=['studies'])
 
+    def __str__(self):
+        return self.title
+
     class Meta:
         unique_together = ('nes_id', 'owner')
 
@@ -58,6 +61,12 @@ class Experiment(models.Model):
     # versions[1].field_dict["study_id"] returns id
     # TODO: commented to pass test scripts
     reversion.register(Study, follow=['experiments'])
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        unique_together = ('nes_id', 'owner')
 
 
 class ProtocolComponent(models.Model):
