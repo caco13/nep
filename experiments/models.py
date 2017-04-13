@@ -53,7 +53,7 @@ class ExperimentStatus(models.Model):
     description = models.TextField()
 
     def __str__(self):
-        return self.name
+        return self.description
 
 
 # TODO: is there a best solution? See Experiment.
