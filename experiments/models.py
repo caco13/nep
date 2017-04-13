@@ -65,6 +65,14 @@ class Experiment(models.Model):
         unique_together = ('nes_id', 'owner')
 
 
+class ExperimentStatus(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.name
+
+
 class ProtocolComponent(models.Model):
     identification = models.CharField(max_length=50)
     description = models.TextField(blank=True)
