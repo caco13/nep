@@ -329,11 +329,11 @@ class ProtocolComponentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProtocolComponent.objects.all()
     serializer_class = ProtocolComponentSerializer
 
-    def perform_update(self, serializer):
-        last_experiment_revision = Version.get
+    # def perform_update(self, serializer):
+        # last_experiment_revision = Version.get
 
-        with reversion.create_revision():
-            serializer.save()
+        # with reversion.create_revision():
+        #     serializer.save()
 
 
 class GroupList(generics.ListCreateAPIView):
