@@ -322,18 +322,11 @@ class ProtocolComponentList(generics.ListCreateAPIView):
         ).get()
         with reversion.create_revision():
             serializer.save(experiment=experiment, owner=self.request.user)
-            reversion.add_to_revision(experiment)
 
 
 class ProtocolComponentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProtocolComponent.objects.all()
     serializer_class = ProtocolComponentSerializer
-
-    # def perform_update(self, serializer):
-        # last_experiment_revision = Version.get
-
-        # with reversion.create_revision():
-        #     serializer.save()
 
 
 class GroupList(generics.ListCreateAPIView):

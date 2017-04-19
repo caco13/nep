@@ -51,9 +51,14 @@ urlpatterns = format_suffix_patterns([
     url(r'^experiments/(?P<pk1>[0-9]+)/software_versions/(?P<pk2>['
         r'0-9]+)/emg_settings/$', api.EMGSettingList.as_view()),
     url(r'^emg_settings/$', api.EMGSettingList.as_view()),
+
+    # protocol components
     url(r'^experiments/(?P<pk>[0-9]+)/protocol_components/$',
         api.ProtocolComponentList.as_view()),
     url(r'^protocol_components/$', api.ProtocolComponentList.as_view()),
+    url(r'^protocol_components/(?P<pk>[0-9]+)/update/$',
+        api.ProtocolComponentDetail.as_view()),
+
     url(r'^protocol_components/(?P<pk>[0-9]+)/groups/$',
         api.GroupList.as_view(), name='api_groups_post'),
     url(r'^groups/$', api.GroupList.as_view(), name='api_groups'),
