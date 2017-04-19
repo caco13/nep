@@ -39,7 +39,7 @@ class Study(models.Model):
     nes_id = models.PositiveIntegerField()
     researcher = models.ForeignKey(Researcher, related_name='studies')
     owner = models.ForeignKey(User)
-    reversion.register(Researcher, follow=['studies'])
+    # reversion.register(Researcher, follow=['studies'])
 
     def __str__(self):
         return self.title
@@ -62,6 +62,9 @@ class ExperimentStatus(models.Model):
 DEFAULT_STATUS = 1
 
 
+# TODO: não está funcionando exclusão de campo para desconsiderar
+# TODO: versionamento.
+# TODO: Ver VersionAdmin.
 @reversion.register()
 class Experiment(models.Model):
     title = models.CharField(max_length=150)
@@ -71,7 +74,7 @@ class Experiment(models.Model):
     nes_id = models.PositiveIntegerField()
     owner = models.ForeignKey(User)
     status = models.ForeignKey(ExperimentStatus, default=DEFAULT_STATUS)
-    reversion.register(Study, follow=['experiments'])
+    # reversion.register(Study, follow=['experiments'])
 
     def __str__(self):
         return self.title
@@ -80,6 +83,7 @@ class Experiment(models.Model):
         unique_together = ('nes_id', 'owner')
 
 
+@reversion.register()
 class ProtocolComponent(models.Model):
     identification = models.CharField(max_length=50)
     description = models.TextField(blank=True)

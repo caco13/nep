@@ -6,8 +6,11 @@ rm db.sqlite3
 echo "Migrating..."
 python manage.py migrate
 
-echo "Create test users..."
+echo "Creating test users..."
 python manage.py shell < ./test_scripts/create_users.py
+
+echo "Creating experiment status..."
+python manage.py shell < ./test_scripts/create_status.py
 
 read -n1 -r -p "Press Enter to GET researchers..." key
 if [ "$key" = '' ]; then
