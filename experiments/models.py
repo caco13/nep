@@ -39,12 +39,32 @@ class Study(models.Model):
     nes_id = models.PositiveIntegerField()
     researcher = models.ForeignKey(Researcher, related_name='studies')
     owner = models.ForeignKey(User)
-    reversion.register(Researcher, follow=['studies'])
+    # reversion.register(Researcher, follow=['studies'])
+
+    def __str__(self):
+        return self.title
 
     class Meta:
         unique_together = ('nes_id', 'owner')
 
 
+class ExperimentStatus(models.Model):
+    name = models.CharField(max_length=50)
+    description = models.TextField()
+
+    def __str__(self):
+        return self.description
+
+
+# TODO: is there a best solution? See Experiment.
+# TODO: http://stackoverflow.com/questions/9311996/setting-default-value-for
+# TODO: -foreign-key-attribute#9312738
+DEFAULT_STATUS = 1
+
+
+# TODO: não está funcionando exclusão de campo para desconsiderar
+# TODO: versionamento.
+# TODO: Ver VersionAdmin.
 @reversion.register()
 class Experiment(models.Model):
     title = models.CharField(max_length=150)
@@ -53,13 +73,17 @@ class Experiment(models.Model):
     study = models.ForeignKey(Study, related_name='experiments')
     nes_id = models.PositiveIntegerField()
     owner = models.ForeignKey(User)
-    # TODO: not following studies
-    # versions[1].field_dict["study"] returns error
-    # versions[1].field_dict["study_id"] returns id
-    # TODO: commented to pass test scripts
-    reversion.register(Study, follow=['experiments'])
+    status = models.ForeignKey(ExperimentStatus, default=DEFAULT_STATUS)
+    # reversion.register(Study, follow=['experiments'])
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        unique_together = ('nes_id', 'owner')
 
 
+@reversion.register()
 class ProtocolComponent(models.Model):
     identification = models.CharField(max_length=50)
     description = models.TextField(blank=True)

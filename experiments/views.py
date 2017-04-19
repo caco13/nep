@@ -2,12 +2,14 @@ from django.shortcuts import render
 from reversion.models import Version
 from django.contrib.auth.models import User
 
-from experiments.models import Experiment, Participant, Study
+from experiments.models import Experiment, Participant, Study, ExperimentStatus
 
 
 # Table with experiments
 def home_page(request):
-    experiments = Experiment.objects.all()
+    # TODO: best way?
+    status = ExperimentStatus.objects.filter(name='approved').get()
+    experiments = Experiment.objects.filter(status=status.id)
     context = {'experiments_list': experiments}
     return render(request, 'experiments/index.html', context)
 

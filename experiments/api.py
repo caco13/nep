@@ -1,9 +1,10 @@
-from rest_framework import serializers, generics, permissions
 from rest_framework import parsers
+from rest_framework import serializers, generics, permissions
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
-
+import reversion
+from reversion.models import Version
 
 from experiments.models import Experiment, Study, User, Researcher, \
     TMSSetting, EEGSetting, EMGSetting, Manufacturer, Software, \
@@ -14,11 +15,12 @@ from experiments.models import Experiment, Study, User, Researcher, \
 class ExperimentSerializer(serializers.ModelSerializer):
     study = serializers.ReadOnlyField(source='study.title')
     owner = serializers.ReadOnlyField(source='owner.username')
+    status = serializers.ReadOnlyField(source='status.name')
 
     class Meta:
         model = Experiment
         fields = ('id', 'title', 'description', 'data_acquisition_done',
-                  'nes_id', 'study', 'owner')
+                  'nes_id', 'study', 'owner', 'status')
 
 
 class OwnerSerializer(serializers.ModelSerializer):
@@ -153,15 +155,18 @@ def api_root(request, format=None):
 
 
 class ExperimentList(generics.ListCreateAPIView):
-    queryset = Experiment.objects.all()
-    serializer_class = ExperimentSerializer
-    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+        queryset = Experiment.objects.all()
+        serializer_class = ExperimentSerializer
+        permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
 
-    def perform_create(self, serializer):
-        study = Study.objects.filter(
-            nes_id=self.kwargs.get('pk'), owner=self.request.user.id
-        ).get()
-        serializer.save(study=study, owner=self.request.user)
+        def perform_create(self, serializer):
+            study = Study.objects.filter(
+                nes_id=self.kwargs.get('pk'), owner=self.request.user.id
+            ).get()
+            with reversion.create_revision():
+                serializer.save(study=study, owner=self.request.user)
+                reversion.set_user(self.request.user)
+                reversion.set_comment("First revision")
 
 
 class ExperimentDetail(generics.RetrieveUpdateDestroyAPIView):
@@ -315,7 +320,20 @@ class ProtocolComponentList(generics.ListCreateAPIView):
         experiment = Experiment.objects.filter(
             nes_id=self.kwargs.get('pk'), owner=self.request.user
         ).get()
-        serializer.save(experiment=experiment, owner=self.request.user)
+        with reversion.create_revision():
+            serializer.save(experiment=experiment, owner=self.request.user)
+            reversion.add_to_revision(experiment)
+
+
+class ProtocolComponentDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset = ProtocolComponent.objects.all()
+    serializer_class = ProtocolComponentSerializer
+
+    # def perform_update(self, serializer):
+        # last_experiment_revision = Version.get
+
+        # with reversion.create_revision():
+        #     serializer.save()
 
 
 class GroupList(generics.ListCreateAPIView):
