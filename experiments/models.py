@@ -14,14 +14,6 @@ def validate_future_date(value):
         raise ValidationError("This date cannot be greater than today date.")
 
 
-# As we use django-reversion we will group togheter
-# all django-reversion versions that pertain to an
-# experiment version.
-class ExperimentVersion(models.Model):
-    revision = models.OneToOneField(Revision)
-    version = models.PositiveIntegerField()
-
-
 class Researcher(models.Model):
     # We are using blank=True to permit POST with blank fields
     # from User model in nes.
@@ -87,6 +79,19 @@ class Experiment(models.Model):
 
     class Meta:
         unique_together = ('nes_id', 'owner')
+
+
+# As we use django-reversion we will group togheter
+# all django-reversion versions that pertain to an
+# experiment version.
+class ExperimentVersion(models.Model):
+    version = models.PositiveIntegerField()
+    experiment = models.ForeignKey(Experiment)
+
+
+class ExperimentVersionMeta(models.Model):
+    experiment_version = models.ForeignKey(ExperimentVersion)
+    revision = models.OneToOneField(Revision)
 
 
 @reversion.register()
