@@ -4,11 +4,12 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.reverse import reverse
 import reversion
-from reversion.models import Version
+from reversion.models import Revision
 
 from experiments.models import Experiment, Study, User, Researcher, \
     TMSSetting, EEGSetting, EMGSetting, Manufacturer, Software, \
-    SoftwareVersion, ProtocolComponent, Group, Participant, ExamFile
+    SoftwareVersion, ProtocolComponent, Group, Participant, ExamFile, \
+    ExperimentVersion, ExperimentVersionMeta
 
 
 # API Serializers
@@ -164,14 +165,42 @@ class ExperimentList(generics.ListCreateAPIView):
                 nes_id=self.kwargs.get('pk'), owner=self.request.user.id
             ).get()
             with reversion.create_revision():
-                serializer.save(study=study, owner=self.request.user)
+                exp_serializer = serializer.save(study=study,
+                                                 owner=self.request.user)
+                experiment = Experiment.objects.get(id=exp_serializer.id)
                 reversion.set_user(self.request.user)
-                reversion.set_comment("First revision")
+                reversion.set_comment("First revision")  # TODO: pegar do request
+                last_version = ExperimentVersion.objects.filter(
+                    experiment=experiment).last()
+                if not last_version:
+                    # this is the first version
+                    version = 1
+                else:
+                    version = last_version.version + 1
+
+                exp_version = ExperimentVersion.objects.create(
+                        version=version, experiment=experiment)
+                reversion.add_meta(ExperimentVersionMeta,
+                                   experiment_version=exp_version)
 
 
 class ExperimentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Experiment.objects.all()
     serializer_class = ExperimentSerializer
+
+    def perform_update(self, serializer):
+        with reversion.create_revision():
+            exp_serializer = serializer.save()
+            experiment = Experiment.objects.get(id=exp_serializer.id)
+            reversion.set_user(self.request.user)
+            reversion.set_comment("Second revision")  # TODO: pegar do request
+            last_version = ExperimentVersion.objects.filter(
+                experiment=experiment).last()
+            version = last_version.version + 1  # TODO: mas e se não achou
+            exp_version = ExperimentVersion.objects.create(
+                version=version, experiment=experiment)
+            reversion.add_meta(ExperimentVersionMeta,
+                               experiment_version=exp_version)
 
 
 class ExperimentListNesId(generics.ListAPIView):
@@ -322,18 +351,30 @@ class ProtocolComponentList(generics.ListCreateAPIView):
         ).get()
         with reversion.create_revision():
             serializer.save(experiment=experiment, owner=self.request.user)
-            reversion.add_to_revision(experiment)
+            last_version = ExperimentVersion.objects.filter(
+                experiment=experiment).last()
+            if not last_version:
+                # TODO: gerar exceção - não há versão para um experimento criada
+                pass
+            reversion.add_meta(ExperimentVersionMeta,
+                               experiment_version=last_version)
 
 
 class ProtocolComponentDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = ProtocolComponent.objects.all()
     serializer_class = ProtocolComponentSerializer
 
-    # def perform_update(self, serializer):
-        # last_experiment_revision = Version.get
-
-        # with reversion.create_revision():
-        #     serializer.save()
+    def perform_update(self, serializer):
+        with reversion.create_revision():
+            pc_serializer = serializer.save()
+            experiment = Experiment.objects.get(id=pc_serializer.experiment)
+            last_version = ExperimentVersion.objects.filter(
+                experiment=experiment).last()
+            if not last_version:
+                # TODO: gerar exceção - não há versão para um experimento criada
+                pass
+            reversion.add_meta(ExperimentVersionMeta,
+                               experiment_version=last_version)
 
 
 class GroupList(generics.ListCreateAPIView):

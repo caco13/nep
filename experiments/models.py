@@ -3,17 +3,15 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 import datetime
 import reversion
+from reversion.models import Revision
 
 
 # Custom validators
-
-# Valida data:
-# data não pode ser maior que a atual
+# Validates date:
+# some date cannot be greater than current date
 def validate_future_date(value):
     if value > datetime.date.today():
-        raise ValidationError(
-            "This date cannot be greater than today date."
-        )
+        raise ValidationError("This date cannot be greater than today date.")
 
 
 class Researcher(models.Model):
@@ -81,6 +79,19 @@ class Experiment(models.Model):
 
     class Meta:
         unique_together = ('nes_id', 'owner')
+
+
+# As we use django-reversion we will group togheter
+# all django-reversion versions that pertain to an
+# experiment version.
+class ExperimentVersion(models.Model):
+    version = models.PositiveIntegerField()
+    experiment = models.ForeignKey(Experiment)
+
+
+class ExperimentVersionMeta(models.Model):
+    experiment_version = models.ForeignKey(ExperimentVersion)
+    revision = models.OneToOneField(Revision)
 
 
 @reversion.register()
