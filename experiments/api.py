@@ -21,7 +21,8 @@ class ExperimentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Experiment
         fields = ('id', 'title', 'description', 'data_acquisition_done',
-                  'nes_id', 'study', 'owner', 'status')
+                  'study', 'nes_id', 'ethics_committee_project_file',
+                  'owner', 'status')
 
 
 class OwnerSerializer(serializers.ModelSerializer):
@@ -159,14 +160,18 @@ class ExperimentList(generics.ListCreateAPIView):
         queryset = Experiment.objects.all()
         serializer_class = ExperimentSerializer
         permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
+        parser_classes = (parsers.MultiPartParser, parsers.FormParser,)
 
         def perform_create(self, serializer):
             study = Study.objects.filter(
                 nes_id=self.kwargs.get('pk'), owner=self.request.user.id
             ).get()
             with reversion.create_revision():
-                exp_serializer = serializer.save(study=study,
-                                                 owner=self.request.user)
+                exp_serializer = serializer.save(
+                    study=study,
+                    ethics_committee_project_file=self.request.data.get(
+                        'ethics_committee_project_file'),
+                    owner=self.request.user)
                 experiment = Experiment.objects.get(id=exp_serializer.id)
                 reversion.set_user(self.request.user)
                 reversion.set_comment("First revision")  # TODO: pegar do request

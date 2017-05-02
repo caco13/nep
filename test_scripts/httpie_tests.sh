@@ -1,4 +1,4 @@
-#!/bin/bash
+ #!/bin/bash
 
 echo "Cleaning db..."
 rm db.sqlite3
@@ -46,7 +46,7 @@ fi
 read -n1 -r -p "Press Enter to POST new experiment..." key
 if [ "$key" = '' ]; then
     echo "POSTing new experiment..."
-    http -a lab1:nep-lab1 POST http://127.0.0.1:8000/api/studies/2/experiments/ title='First experiment' description='First experiment description' data_acquisition_done='True' nes_id=1
+    http -a lab1:nep-lab1 -f POST http://127.0.0.1:8000/api/studies/2/experiments/ title='First experiment' description='First experiment description' data_acquisition_done='True' nes_id=1 ethics_committee_project_file@~/Downloads/autores.png
 fi
 
 read -n1 -r -p "Press Enter to GET protocol_components..." key

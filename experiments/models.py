@@ -70,6 +70,10 @@ class Experiment(models.Model):
     data_acquisition_done = models.BooleanField(default=False)
     study = models.ForeignKey(Study, related_name='experiments')
     nes_id = models.PositiveIntegerField()
+    ethics_committee_project_file = models.FileField(
+        'Project file approved by the ethics committee',
+        null=True, blank=True
+    )
     owner = models.ForeignKey(User)
     status = models.ForeignKey(ExperimentStatus, default=DEFAULT_STATUS)
     # reversion.register(Study, follow=['experiments'])
