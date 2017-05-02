@@ -1,10 +1,11 @@
-# IDE's
-.idea
-
 db.sqlite3
 geckodriver.log
 __pycache__
 *.swp
+*.pyc
+
+# IDE's
+.idea
 
 # Scripts de testes temporários
 #test_scripts
