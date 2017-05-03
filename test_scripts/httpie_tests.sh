@@ -70,7 +70,7 @@ fi
 read -n1 -r -p "Press Enter to POST groups..." key
 if [ "$key" = '' ]; then
     echo "POSTing new group..."
-    http -a lab1:nep-lab1 POST http://127.0.0.1:8000/api/experiments/1/protocol_components/1/groups/ title='First group' description='First group description' nes_id=1
+    http -a lab1:nep-lab1 POST http://127.0.0.1:8000/api/protocol_components/1/groups/ title='First group' description='First group description' nes_id=1
 fi
 
 read -n1 -r -p "Press Enter to GET participants..." key
